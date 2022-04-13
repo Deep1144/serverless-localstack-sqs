@@ -1,0 +1,80 @@
+service: localstack-lambda
+plugins:
+  - serverless-localstack
+  - serverless-offline
+  - serverless-offline-sqs
+
+
+custom:
+  serverless-offline:
+    host: 0.0.0.0
+    httpPort: 3000
+    lambdaPort: 3001
+    useChildProcesses: false
+  serverless-offline-sqs:
+    sqsHost: 127.0.0.1
+    sqsPort: 4566
+    autoCreate: false
+    apiVersion: "latest"
+    endpoint: http://127.0.0.1:4566
+    region: us-east-1
+    accessKeyId: local
+    secretAccessKey: local
+    skipCacheInvalidation: false
+  localstack:
+    debug: true
+    stages:
+     - local
+     - dev
+    endpointFile: localstack_endpoints.json
+
+    
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+
+
+functions:
+  hello:
+    handler: handler.hello
+
+  QueueSendMessage:
+    handler: handler.sendMessage
+    name: Queue-SendMessage-Lambda
+    description: to send sqs message
+    events:
+      - http:
+          path: /app-store-server-notifications
+          method: get
+          cors: true
+
+  QueueReceiveMessage:
+    handler: handler.receiveMessage
+    name: Queue-ReceiveMessage-Lambda
+    description: to receive sqs message
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - sqsOfflineQueue
+              - Arn
+          batchSize: 10
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    sqsOfflineQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: sqsOfflineQueue
+        MessageRetentionPeriod: 1209600
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt:
+              - sqsOfflineQueue
+              - Arn
+          maxReceiveCount: 3
+        VisibilityTimeout: 10

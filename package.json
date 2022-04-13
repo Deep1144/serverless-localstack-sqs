@@ -1,0 +1,30 @@
+{
+  "name": "serverless-localstack-lambda",
+  "version": "1.0.0",
+  "description": "Serverless LocalStack Lambda",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "offline": "OFFLINE=TRUE sls offline start",
+    "create:queue": "aws --endpoint-url=http://localhost:4566 sqs create-queue --queue-name sqsOfflineQueue --region us-east-1",
+    "list:queue": "aws --endpoint-url=http://localhost:4566 sqs list-queues --region us-east-1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oxlb/serverless-localstack-lambda.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oxlb/serverless-localstack-lambda/issues"
+  },
+  "homepage": "https://github.com/oxlb/serverless-localstack-lambda#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1113.0",
+    "serverless": "^3.12.0",
+    "serverless-localstack": "^0.4.35",
+    "serverless-offline": "^8.5.0",
+    "serverless-offline-sqs": "^6.0.0"
+  }
+}
